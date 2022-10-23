@@ -5,12 +5,12 @@ import { Avatar, Button, Grid, Paper, Typography } from "@material-ui/core";
 //========React========
 
 import { useEffect } from "react";
-import { useDispatch } from "react-redux";
 import { useLocation, useNavigate } from "react-router";
+import { useAppDispatch } from "../../store/app/hooks";
 
-//========Constants========
+//========Action Types========
 
-import { LOGOUT } from "../../constants/actionTypes";
+import { logOut } from "../../store/actions/authActions";
 
 //========Styles========
 
@@ -18,20 +18,50 @@ import  useStyles from "./styles";
 
 //###############################################################//
 
-export const UserCard = () => {
+const UserCard = () => {
 
     const classes = useStyles();
-    const dispatch = useDispatch();
+    const dispatch = useAppDispatch();
     const navigate = useNavigate();
     const location = useLocation();
-    const user = localStorage.getItem("profile");
+    
+    let user;
+    
+    let local = localStorage.getItem("profile");
+    if(local){
 
-    const logOut = () =>{
+        user = JSON.parse(local).user;
+    }else{
 
-        dispatch({ type: LOGOUT });
-        navigate("");
-        
+        user = false;
     }
+
+
+
+    const handleClick = (e:any) => {
+
+        switch (e.target.name) {
+
+            case "signIn":
+                
+                navigate("/auth");
+                break;
+            
+            case "signUp":
+                
+                navigate("/auth");
+                break;
+
+            case "logOut":
+            
+                dispatch(logOut(navigate));
+                break;
+
+            default:
+                break;
+        }
+    }
+
     useEffect(()=>{},[location]);
 
     return(
@@ -40,16 +70,16 @@ export const UserCard = () => {
             <Paper className={classes.paper} elevation={2}>
                 {!user 
                     ? <>
-                        <Button size="large" variant="contained" color="primary">Sign In</Button>
-                        <Button size="large" variant="contained" color="secondary">Sign Up</Button>
+                        <Button name="signIn" size="large" variant="contained" color="primary" onClick={handleClick}>Sign In</Button>
+                        <Button name="signUp" size="large" variant="contained" color="secondary" onClick={handleClick}>Sign Up</Button>
                     </>
                     : <>
                         <Avatar className={classes.avatar} alt="q inda" >
-                            A
+                            {user.first_name.charAt(0)}
                         </Avatar>
-                        <Typography variant="h3">El Capo</Typography>
+                        <Typography variant="h3">{`${user.first_name} ${user.last_name}`}</Typography>
                         <Typography variant="h5" component="p">Editar</Typography>
-                        <Button size="large" variant="contained" color="primary" onClick={logOut}>LogOut</Button>
+                        <Button name="logOut" size="large" variant="contained" color="primary" onClick={handleClick}>LogOut</Button>
                     </>
                 }
             </Paper>
@@ -57,3 +87,5 @@ export const UserCard = () => {
     );
 
 };
+
+export default UserCard;
